@@ -5,25 +5,40 @@ using UnityEngine;
 [RequireComponent (typeof(AudioSource))]
 public class AudioPeer : MonoBehaviour {
     AudioSource _audioSource;
-    float[] _samplesLeft = new float[512];
-    float[] _samplesRight = new float[512];
-    float[] _freqBand = new float[8];
-    float[] _bandBuffer = new float[8];
-    float[] _bufferDecrease = new float[8];
+    private float[] _samplesLeft = new float[512];
+    private float[] _samplesRight = new float[512];
 
-    public float[] _freqBandsHighest = new float[8];
-    public static float[] _audioBand = new float[8];
-    public static float[] _audioBandBuffer = new float[8];
+    private float[] _freqBand = new float[8];
+    private float[] _bandBuffer = new float[8];
+    private float[] _bufferDecrease = new float[8];
+    private float[] _freqBandsHighest = new float[8];
+
+    // audio band 64
+    private float[] _freqBand64 = new float[64];
+    private float[] _bandBuffer64 = new float[64];
+    private float[] _bufferDecrease64 = new float[64];
+    private float[] _freqBandsHighest64 = new float[64];
+
+    [HideInInspector]
+    public static float[] _audioBand, _audioBandBuffer;
+    [HideInInspector]
+    public static float[] _audioBand64, _audioBandBuffer64;
+
+    [HideInInspector]
+    public static float _Amplitude, _AmplitudeBuffer; //todo remove static
     public float _audioProfile;
-
-    public static float _Amplitude, _AmplitudeBuffer;
-    float _AmplitudeHighest;
+    private float _AmplitudeHighest;
 
     public enum _channel {stereo, left, right};
     public _channel channel = new _channel();
 
 	// Use this for initialization
 	void Start () {
+        _audioBand = new float[8];
+        _audioBandBuffer = new float[8];
+        _audioBand64 = new float[64];
+        _audioBandBuffer64 = new float[64];
+
         _audioSource = GetComponent<AudioSource>();
         AudioProfile(_audioProfile);
 	}
@@ -80,6 +95,38 @@ public class AudioPeer : MonoBehaviour {
             float average = 0;
             int sampleCount = (int)Mathf.Pow(2, i) * 2;
 
+            if(sampleCount == 7) {
+                sampleCount += 2;
+            }
+            for(int j = 0; j < sampleCount; j++) {
+                if(channel == _channel.stereo) {
+                    average += _samplesLeft[count] + _samplesRight[count] * (count * 1);
+                    count++;
+                }
+                if(channel == _channel.left) {
+                    average += _samplesLeft[count] * (count * 1);
+                    count++;
+                }
+                if(channel == _channel.right) {
+                    average += _samplesRight[count] * (count * 1);
+                    count++;
+                }
+
+            }
+            average /= count;
+            _freqBand[i] = average * 10;
+        }
+    }
+
+    void MakeFrequencyBands64() {
+        int count = 0;
+        int sampleCount = 1;
+        int power = 0;
+
+
+        for(int i = 0; i < 64; i++) {
+            float average = 0;
+           
             if(sampleCount == 7) {
                 sampleCount += 2;
             }

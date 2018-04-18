@@ -25,7 +25,7 @@ public class AudioPeer : MonoBehaviour {
     public static float[] _audioBand64, _audioBandBuffer64;
 
     [HideInInspector]
-    public static float _Amplitude, _AmplitudeBuffer; //todo remove static
+    public float _Amplitude, _AmplitudeBuffer; //todo remove static
     public float _audioProfile;
     private float _AmplitudeHighest;
 
@@ -47,8 +47,11 @@ public class AudioPeer : MonoBehaviour {
 	void Update () {
         GetSpectrumAudioSource();
         MakeFrequencyBands();
+        //MakeFrequencyBands64();
         BandBuffer();
+        //BandBuffer64();
         CreateAudioBands();
+        //CreateAudioBands64();
         GetAmplitude();
 	}
 
@@ -80,6 +83,17 @@ public class AudioPeer : MonoBehaviour {
             _audioBand[i] = (_freqBand[i] / _freqBandsHighest[i]);
             _audioBandBuffer[i] = (_bandBuffer[i] / _freqBandsHighest[i]);
                
+        }
+    }
+
+    void CreateAudioBands64() {
+        for(int i = 0; i < 64; i++) {
+            if(_freqBand64[i] > _freqBandsHighest64[i]) {
+                _freqBandsHighest64[i] = _freqBand64[i];
+            }
+            _audioBand64[i] = (_freqBand64[i] / _freqBandsHighest64[i]);
+            _audioBandBuffer64[i] = (_bandBuffer64[i] / _freqBandsHighest64[i]);
+
         }
     }
 
@@ -126,10 +140,18 @@ public class AudioPeer : MonoBehaviour {
 
         for(int i = 0; i < 64; i++) {
             float average = 0;
-           
-            if(sampleCount == 7) {
-                sampleCount += 2;
+            if(i == 16 || i == 32 || i == 40 || i == 48 || i == 56) {
+                power++;
+                sampleCount = (int)Mathf.Pow(2, i) * 2;
+                if(power == 3) {
+                    sampleCount -= 2;
+                }
             }
+           
+            //if(sampleCount == 7) {
+            //    sampleCount += 2;
+            //}
+
             for(int j = 0; j < sampleCount; j++) {
                 if(channel == _channel.stereo) {
                     average += _samplesLeft[count] + _samplesRight[count] * (count * 1);
@@ -146,7 +168,7 @@ public class AudioPeer : MonoBehaviour {
 
             }
             average /= count;
-            _freqBand[i] = average * 10;
+            _freqBand64[i] = average * 80;
         }
     }
 
@@ -159,6 +181,19 @@ public class AudioPeer : MonoBehaviour {
             if(_freqBand[g] < _bandBuffer[g]) {
                 _bandBuffer[g] -= _bufferDecrease[g];
                 _bufferDecrease[g] *= 1.2f;
+            }
+        }
+    }
+
+    void BandBuffer64() {
+        for(int g = 0; g < 64; g++) {
+            if(_freqBand64[g] > _bandBuffer64[g]) {
+                _bandBuffer64[g] = _freqBand64[g];
+                _bufferDecrease64[g] = 0.005f;
+            }
+            if(_freqBand64[g] < _bandBuffer64[g]) {
+                _bandBuffer64[g] -= _bufferDecrease64[g];
+                _bufferDecrease64[g] *= 1.2f;
             }
         }
     }

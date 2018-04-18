@@ -897,6 +897,7 @@ MonoBehaviour:
   _red: 0.5
   _green: 0.5
   _blue: 0.5
+  _audioPeer: {fileID: 1716774687}
 --- !u!23 &1212209629
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -1551,15 +1552,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 16692669e6ce36b4eb315a8e8d0f236d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _freqBandsHighest:
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
-  - 0
+  _Amplitude: 0
+  _AmplitudeBuffer: 0
   _audioProfile: 3
   channel: 0
 --- !u!82 &1716774688
